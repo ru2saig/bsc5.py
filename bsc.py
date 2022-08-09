@@ -1,8 +1,10 @@
 from PIL import Image
+import urllib.request
+import gzip
 import numpy as np
 import math
 import sys
-
+import os
 
 def sind(deg):
     return math.sin(deg * math.pi/180)
@@ -31,6 +33,26 @@ if __name__ == "__main__":
               file=sys.stderr)
         exit(2)
 
+    # ask to download the file if it's not found
+    if not os.path.exists("bsc5.dat.gz"):
+        print("Catalog not found. Would you like to download it now?\nSource: http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz")
+
+        valid_option = False
+        while not valid_option:
+            option = input("[Y/n]: ")
+            if option in ["Y", "y", "N", "n"]:
+                valid_option = True
+
+        if option == "Y" or option == "y":
+            print("Downloading:")
+            # TODO: Add the reporthook function (see documentation)
+            urllib.request.urlretrieve("http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz", "bsc5.dat.gz")
+            print("Download complete!")
+
+        else:
+            print("Please download the file and rerun the script. Exiting.")
+            exit(3)
+
     # arrays to draw into
     xplus = np.zeros((size, size))
     xminus = np.zeros((size, size))
@@ -39,10 +61,11 @@ if __name__ == "__main__":
     zplus = np.zeros((size, size))
     zminus = np.zeros((size, size))
 
-    # download the file if it's not found here
-    # TODO: Make it an argument? The path to the dataset?
-    with open("bsc5.dat") as bsc5cat:
-        for line in bsc5cat:
+    
+    with gzip.open("bsc5.dat.gz") as bsc5cat:
+        for bline in bsc5cat:
+            line = bline.decode()
+
             try:
                 rah = int(line[75:77])  # RA hours
                 ram = int(line[77:79])  # RA minutes
@@ -62,7 +85,7 @@ if __name__ == "__main__":
             # convert to degrees
             dec_deg = (decd+(1.0/60.0)*decm+(1.0/3600.0)*decs)*dec_sign
             ra_deg = (rah+(1.0/60.0)*ram+(1.0/3600.0)*ras) * 15.0
-
+            
             # sanity check the range
             if ra_deg > 360.0:
                 ra_deg -= 360.0
@@ -89,15 +112,15 @@ if __name__ == "__main__":
             # calculate the brightness of the star
             vis_mag = 4.0 if vis_mag >= 5 else vis_mag
             bright = int(min(1.0, math.log(5.0 - vis_mag)) * 255) % 256
-
+            
             if math.fabs(zz) > math.fabs(xx) and math.fabs(zz) > math.fabs(yy) and zz > 0.0:
                 # plot in +ve z plane
                 x = int(xx * (1/zz) * (size/2))
                 y = int(yy * (1/zz) * (size/2))
-
+                
                 if check_value(x, size):
                     zplus[size//2 + y, size//2 + x] = bright
-
+                    
             if math.fabs(zz) > math.fabs(xx) and math.fabs(zz) > math.fabs(yy) and zz < 0.0:
                 # plot in -ve z plane
                 x = int(xx * (1/zz) * (size/2))
@@ -138,7 +161,8 @@ if __name__ == "__main__":
                 if check_value(x, size):
                     yminus[size//2 - y, size//2 + x] = bright
 
-    # write images to output
+                
+    # write to images
     Image.fromarray(xplus).convert("RGB").save("xplus.png")
     Image.fromarray(xminus).convert("RGB").save("xminus.png")
     Image.fromarray(yplus).convert("RGB").save("yplus.png")
