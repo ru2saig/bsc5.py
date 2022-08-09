@@ -8,7 +8,8 @@ import os
 
 
 def download_status(blocknum, bs, file_size):
-    print(f"Downloaded {min(100, int((blocknum * bs)/file_size * 100))}% ")
+    completed = int((blocknum*bs)/file_size * 99)
+    print("\rDownloading [" + completed * "=" + (99 - completed) * " " + "]", flush = True, end="")
 
 
 def sind(deg):
@@ -49,12 +50,12 @@ if __name__ == "__main__":
                 valid_option = True
 
         if option == "Y" or option == "y":
-            print("Downloading:")
+            print("Download starting...")
             try:
                 urllib.request.urlretrieve("http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz", "bsc5.dat.gz", download_status)
-                print("Download complete!")
+                print("\nDownload complete!")
             except KeyboardInterrupt:
-                print("Download interrupted. Exiting")
+                print("\nDownload interrupted. Exiting")
                 os.remove("bsc5.dat.gz")  # remove half interuppted thing
                 exit(3)
 
@@ -170,7 +171,6 @@ if __name__ == "__main__":
                 if check_value(x, size):
                     yminus[size//2 - y, size//2 + x] = bright
 
-                
     # write to images
     Image.fromarray(xplus).convert("RGB").save("xplus.png")
     Image.fromarray(xminus).convert("RGB").save("xminus.png")
