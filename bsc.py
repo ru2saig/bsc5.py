@@ -6,6 +6,11 @@ import math
 import sys
 import os
 
+
+def download_status(blocknum, bs, file_size):
+    print(f"Downloaded {min(100, int((blocknum * bs)/file_size * 100))}% ")
+
+
 def sind(deg):
     return math.sin(deg * math.pi/180)
 
@@ -45,13 +50,17 @@ if __name__ == "__main__":
 
         if option == "Y" or option == "y":
             print("Downloading:")
-            # TODO: Add the reporthook function (see documentation)
-            urllib.request.urlretrieve("http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz", "bsc5.dat.gz")
-            print("Download complete!")
+            try:
+                urllib.request.urlretrieve("http://tdc-www.harvard.edu/catalogs/bsc5.dat.gz", "bsc5.dat.gz", download_status)
+                print("Download complete!")
+            except KeyboardInterrupt:
+                print("Download interrupted. Exiting")
+                os.remove("bsc5.dat.gz")  # remove half interuppted thing
+                exit(3)
 
         else:
             print("Please download the file and rerun the script. Exiting.")
-            exit(3)
+            exit(4)
 
     # arrays to draw into
     xplus = np.zeros((size, size))
