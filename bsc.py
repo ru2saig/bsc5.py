@@ -12,8 +12,8 @@ def cosd(deg):
     return math.cos(deg * math.pi/180)
 
 
-def check_value(x, size): # whaaaa...?
-    return (x > -size/2 and x < size/2 and x > -size/2 and x < size/2)
+def check_value(x, size):
+    return (x > -size/2 and x < size/2 and y > -size/2 and y < size/2)
 
 
 if __name__ == "__main__":
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
             # calculate the brightness of the star
             vis_mag = 4.0 if vis_mag >= 5 else vis_mag
-            bright = int(min(1.0, math.log(5.0 - vis_mag)) * 255)
+            bright = int(min(1.0, math.log(5.0 - vis_mag)) * 255) % 256
 
             if math.fabs(zz) > math.fabs(xx) and math.fabs(zz) > math.fabs(yy) and zz > 0.0:
                 # plot in +ve z plane
@@ -96,7 +96,7 @@ if __name__ == "__main__":
                 y = int(yy * (1/zz) * (size/2))
 
                 if check_value(x, size):
-                    zplus[size//2 + x, size//2 + y] = bright
+                    zplus[size//2 + y, size//2 + x] = bright
 
             if math.fabs(zz) > math.fabs(xx) and math.fabs(zz) > math.fabs(yy) and zz < 0.0:
                 # plot in -ve z plane
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 y = int(yy * (1/zz) * (size/2))
 
                 if check_value(x, size):
-                    zminus[size//2 - x, size//2 + y] = bright
+                    zminus[size//2 + y, size//2 - x] = bright
 
             if math.fabs(xx) > math.fabs(zz) and math.fabs(xx) > math.fabs(yy) and xx > 0.0:
                 # plot in +ve x plane
@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 y = int(zz * (1.0/xx) * (size/2.0))
 
                 if check_value(x, size):
-                    xplus[size//2 - x, size//2 - y] = bright
+                    xplus[size//2 - y, size//2 - x] = bright
 
             if math.fabs(xx) > math.fabs(zz) and math.fabs(xx) > math.fabs(yy) and xx < 0.0:
                 # plot in -ve x plane
@@ -120,7 +120,7 @@ if __name__ == "__main__":
                 y = int(zz * (1.0/xx) * (size/2.0))
 
                 if check_value(x, size):
-                    xminus[size//2 - x, size//2 - y] = bright
+                    xminus[size//2 - y, size//2 - x] = bright
 
             if math.fabs(yy) > math.fabs(zz) and math.fabs(yy) > math.fabs(xx) and yy > 0.0:
                 # plot in +ve y plane
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                 y = int(zz * (1.0/yy) * (size/2.0))
 
                 if check_value(x, size):
-                    yplus[size//2 + x, size//2 - y] = bright
+                    yplus[size//2 - y, size//2 + x] = bright
 
             if math.fabs(yy) > math.fabs(zz) and math.fabs(yy) and math.fabs(xx) and yy < 0.0:
                 # plot in -ve y plane
@@ -136,7 +136,7 @@ if __name__ == "__main__":
                 y = int(zz * (1.0/yy) * (size/2.0))
 
                 if check_value(x, size):
-                    yminus[size//2 + x, size//2 - y] = bright
+                    yminus[size//2 - y, size//2 + x] = bright
 
     # write images to output
     Image.fromarray(xplus).convert("RGB").save("xplus.png")
